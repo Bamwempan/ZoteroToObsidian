@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Markdown with Custom Tags</title>
+</head>
+<body>
+  <a href="#" download="modified.md" id="download-link" style="display: none;">Télécharger</a>
+  <input type="file" onchange="handleFileSelect(event)">
+  <div id="output"></div>
+
+  <script>
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+
+      const reader = new FileReader();
+      reader.readAsText(file);
+
+      reader.onload = function(event) {
+        const markdown = event.target.result;
+
+        const parsedMarkdown = markdown
+        .replace(/<span\s+class="highlight"[^>]*>(.*?)<\/span>/g, '$1')
+        .replace(/<span style="background-color: #2ea8e580">(.*?)<\/span>/g, '> [!information] $1')
+        .replace(/<span style="background-color: #ffd40080">(.*?)<\/span>/g, '> [!accord] $1')
+        .replace(/<span style="background-color: #5fb23680">(.*?)<\/span>/g, '> [!appronfondir] $1')
+        .replace(/<span style="background-color: #a28ae580">(.*?)<\/span>/g, '> [!bibliographie] $1')
+        //.replace(/<span style="background-color: #5fb23680">(.*?)<\/span>/g, '> [!bibliographie] $1')
+        .replace(/<span\s+class="citation"[^>]*>(.*?)<\/span>/g, '$1')
+        .replace(/<span\s+class="citation-item"[^>]*>(.*?)<\/span>/g, '$1');
+
+        const outputDiv = document.getElementById('output');
+        outputDiv.innerText = parsedMarkdown;
+
+        // Create a Blob with the parsed Markdown
+        const blob = new Blob([parsedMarkdown], { type: 'text/plain' });
+
+        // Update the download link with the Blob URL and the filename
+        const originalFilename = file.name;
+        const modifiedFilename = originalFilename.replace(/\.[^/.]+$/, "") + ".md";
+        const downloadLink = document.getElementById('download-link');
+        downloadLink.href = URL.createObjectURL(blob);
+        downloadLink.download = modifiedFilename;
+        downloadLink.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>
